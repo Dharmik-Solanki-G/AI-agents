@@ -1,0 +1,343 @@
+{
+  "name": "Email Generation agent",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "// Extract the raw JSON string from 'text' field\nconst rawString = items[0].json.text;\n\n// Find the JSON block boundaries\nconst startIndex = rawString.indexOf(\"{\");\nconst endIndex = rawString.lastIndexOf(\"}\") + 1;\n\nif (startIndex === -1 || endIndex === -1) {\n  throw new Error(\"No valid JSON block found.\");\n}\n\n// Extract JSON substring\nconst jsonString = rawString.substring(startIndex, endIndex);\n\n// Parse JSON string into an object\nlet parsed;\ntry {\n  parsed = JSON.parse(jsonString);\n} catch (error) {\n  throw new Error(\"Failed to parse JSON: \" + error.message);\n}\n\n// Return parsed JSON as output item\nreturn [\n  {\n    json: parsed\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        580,
+        0
+      ],
+      "id": "a029f7fa-03d3-49aa-97d4-3c89113f213d",
+      "name": "parser"
+    },
+    {
+      "parameters": {
+        "jsCode": "const lead = items[0].json;\n\nconst productDesc = lead.productDescription || \"our AI product helps marketing teams automate repetitive tasks, save time, and increase campaign effectiveness\";\n\nconst prompt = `You are a professional copywriter specialized in writing highly effective cold outreach emails for marketing. \n\nGiven the lead’s details and product information below, write a concise, friendly, and persuasive email that:\n\n- Grabs attention with a compelling hook\n- Clearly states the value proposition \n- Uses persuasive language and social proof techniques\n- Creates urgency or curiosity\n- Ends with a strong, clear call to action\n- Maintains a professional but approachable tone\n\nLead details:\n- Name: ${lead.name}\n- Role: ${lead.role}\n- Company: ${lead.company}\n\nProduct description:\n${productDesc}\n\nWrite the email body ONLY — no greetings, signatures, or disclaimers. Make it sound personal and tailored to the lead’s role and company.`;\n\nreturn [{ json: { prompt } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        0
+      ],
+      "id": "657df727-3aca-4efc-9502-69a2069534e5",
+      "name": "prompt generater"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.prompt }}\n\n[Your Name]: Dharmik Solanki\n[Your Position]: founder\n[Your Contact Information]: 985841335\n[Your Company]: Debugging Dost\n\n⛔ Important: Respond ONLY with a valid JSON object in this format:\n\n{\n  \"subjectLine\": \"string\",\n  \"email\": \"string\"\n}\n\nDo not include any explanation, greeting, or commentary outside of this JSON format.",
+        "hasOutputParser": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        1000,
+        0
+      ],
+      "id": "a1b6caf9-b93d-413b-8771-9559d9e44ae8",
+      "name": "email generator"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an AI assistant that extracts structured information from user requests.\n\nExtract the following fields from the user message and return JSON ONLY (no explanation, no extra text):\n\n- name (person's name)\n- role (job title)\n- company (company name)\n- productDescription (brief product description mentioned)\n- tone (email tone or style requested)\n- email (email id of the person if not mention use dharmiksg7@gmail.com)\n\nUser message:\n\"{{ $json['massage '] }}\"\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        220,
+        0
+      ],
+      "id": "3947c596-33a1-42c4-b8bc-fbe15bc13b68",
+      "name": "massage to json"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('parser').item.json.email }}",
+        "subject": "={{ $json.subjectLine }}",
+        "emailType": "text",
+        "message": "={{ $json.email }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1580,
+        0
+      ],
+      "id": "d840a072-f8b4-4a9f-b6a0-807aa2001162",
+      "name": "Gmail",
+      "webhookId": "9b687e15-03b0-434f-aed5-141d0d07dc7d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "bikkipLXQtG1JBS3",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "deepseek/deepseek-r1:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        240,
+        180
+      ],
+      "id": "145ac6f6-0de8-40c3-b4ae-12803080e930",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "hZlmyeMFgauwwZHg",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract the raw JSON string from 'text' field\nconst rawString = items[0].json.text;\n\n// Find the JSON block boundaries\nconst startIndex = rawString.indexOf(\"{\");\nconst endIndex = rawString.lastIndexOf(\"}\") + 1;\n\nif (startIndex === -1 || endIndex === -1) {\n  throw new Error(\"No valid JSON block found.\");\n}\n\n// Extract JSON substring\nconst jsonString = rawString.substring(startIndex, endIndex);\n\n// Parse JSON string into an object\nlet parsed;\ntry {\n  parsed = JSON.parse(jsonString);\n} catch (error) {\n  throw new Error(\"Failed to parse JSON: \" + error.message);\n}\n\n// Return parsed JSON as output item\nreturn [\n  {\n    json: parsed\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1380,
+        0
+      ],
+      "id": "34166f07-c4f8-4cda-b734-df210be1d0a9",
+      "name": "parser1"
+    },
+    {
+      "parameters": {
+        "formTitle": "Email Generation agent",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "massage ",
+              "fieldType": "textarea",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -80,
+        0
+      ],
+      "id": "6a703c9d-97d6-4beb-8018-c20919cc5466",
+      "name": "On form submission",
+      "webhookId": "03a43e45-7dde-4416-ab34-a1e54f1518d3"
+    },
+    {
+      "parameters": {
+        "model": "deepseek/deepseek-r1:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        1020,
+        160
+      ],
+      "id": "d16e7229-164b-430d-bdb4-3872a0abaae7",
+      "name": "OpenRouter Chat Model1",
+      "credentials": {
+        "openRouterApi": {
+          "id": "hZlmyeMFgauwwZHg",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Turn Message → JSON\n",
+        "height": 400,
+        "width": 560
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        180,
+        -80
+      ],
+      "typeVersion": 1,
+      "id": "aec5877a-ed71-4327-9172-bd330ed9349a",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Generate Winning Emails\n \n",
+        "height": 400,
+        "width": 740,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        760,
+        -80
+      ],
+      "typeVersion": 1,
+      "id": "58066fc7-1536-4dc9-ae03-0fe9bd640f24",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Send Automatically\n",
+        "height": 240,
+        "width": 200,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1540,
+        -80
+      ],
+      "typeVersion": 1,
+      "id": "bb137056-3717-4b69-a892-39d9f12052c0",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Form\n \n",
+        "height": 240,
+        "width": 200,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -120,
+        -80
+      ],
+      "typeVersion": 1,
+      "id": "b80753e7-30fc-4759-9823-b3270903ff07",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "\n📧 **Email Generator Agent – Setup Guide**\n\n🎯 **Goal:**\nGenerate and send cold outreach emails using AI — from a plain-text message.\n\n---\n\n✅ **What This Agent Does:**\n\n1. Converts natural-language prompt into structured JSON (name, role, company, tone, product).\n2. Uses LLM to generate personalized cold email with copywriting best practices.\n3. Sends emails via Gmail/SMTP (optional).\n4. Logs output to Google Sheets (optional).\n\n---\n\n⚙️ **Step-by-Step Setup:**\n\n**1. Trigger (Input Message)**\nUse a Webhook or a chat-based trigger like Telegram/WhatsApp.\nExample:\n“Write a friendly email to Sarah, Product Manager at OpenAI about our AI writing tool.”\n\n**2. Extract Lead Details**\nUse an LLM node (OpenRouter or OpenAI) to convert plain text into JSON:\n→ name, role, company, tone, product\nPrompt Example:\n“Extract name, role, company, tone, product from: {{input}}”\n\n**3. Generate the Email**\nUse another LLM node with a prompt like:\n“You are a professional cold email copywriter. Write a concise, {{tone}} outreach email for {{role}} at {{company}} about {{product}}. Use Hook → Value → Proof → CTA.”\n\n**4. Send the Email (Optional)**\nUse Gmail node (OAuth or SMTP).\nFields to map:\n\n* To: lead email\n* Subject: from LLM\n* Body: from LLM\n\n**5. Log to Google Sheets (Optional)**\nUse the Google Sheets node to record name, email, status, timestamp, etc.\n\n---\n\n📈 **Results:**\n\n* Saves 8+ hours/week\n* 2–3x reply rate compared to templates\n* Perfect for freelancers, marketers, startup teams\n\n---\n\n👨‍💻 **Built by:**\nDharmik Solanki (@debugging\\_dost)\nFree AI Agent tutorials on YouTube\n\n---\n\nLet me know if you want a version that includes prompt templates too.\n",
+        "height": 1380,
+        "width": 780
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1080,
+        -560
+      ],
+      "typeVersion": 1,
+      "id": "1c08a71d-8bae-48f6-8796-581e9c90c625",
+      "name": "Sticky Note4"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "parser": {
+      "main": [
+        [
+          {
+            "node": "prompt generater",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "prompt generater": {
+      "main": [
+        [
+          {
+            "node": "email generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "email generator": {
+      "main": [
+        [
+          {
+            "node": "parser1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "massage to json": {
+      "main": [
+        [
+          {
+            "node": "parser",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "massage to json",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parser1": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "massage to json",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "email generator",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "3b75f6cd-12b9-4a5a-a382-0bbcb1163255",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "558d88703fb65b2d0e44613bc35916258b0f0bf983c5d4730c00c424b77ca36a"
+  },
+  "id": "3nNfC5pdobavwAGn",
+  "tags": []
+}

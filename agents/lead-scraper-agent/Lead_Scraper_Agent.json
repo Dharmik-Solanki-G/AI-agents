@@ -1,0 +1,353 @@
+{
+  "name": "Lead Scraper Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        60,
+        0
+      ],
+      "id": "ada12693-dccb-4051-bed1-fe88026f40cd",
+      "name": "When chat message received",
+      "webhookId": "7032f2de-08a3-4c78-b6c7-21799ffb6846"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1xTurre2vkXUUn13z0lHHjYMeDVaSINt_o26q6oiRU1Q",
+          "mode": "list",
+          "cachedResultName": "LeadScraperDB",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xTurre2vkXUUn13z0lHHjYMeDVaSINt_o26q6oiRU1Q/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1xTurre2vkXUUn13z0lHHjYMeDVaSINt_o26q6oiRU1Q/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json.name }}",
+            "Role": "={{ $json.role }}",
+            "Company": "={{ $json.company }}",
+            "LinkedIn URL": "={{ $json.linkedinUrl }}",
+            "Snippet": "={{ $json.snippet }}",
+            "Scraped At": "={{ $json.scrapedAt }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Role",
+              "displayName": "Role",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "LinkedIn URL",
+              "displayName": "LinkedIn URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Snippet",
+              "displayName": "Snippet",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Scraped At",
+              "displayName": "Scraped At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1480,
+        0
+      ],
+      "id": "e7d5c778-fc87-4cf9-8dcb-d2fe8445dfce",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "PX0XaHkMN3D6VPrD",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the raw string from the input item\nconst rawString = items[0].json.text;\n\n// Try to extract the valid JSON block from the string\nconst startIndex = rawString.indexOf(\"{\");\nconst endIndex = rawString.lastIndexOf(\"}\") + 1;\n\nif (startIndex === -1 || endIndex === -1) {\n  throw new Error(\"JSON block not found in the text string.\");\n}\n\nconst jsonOnly = rawString.substring(startIndex, endIndex);\n\n// Parse the cleaned JSON string\nlet parsed;\ntry {\n  parsed = JSON.parse(jsonOnly);\n} catch (error) {\n  throw new Error(\"Failed to parse JSON: \" + error.message);\n}\n\n// Return the parsed object\nreturn [\n  {\n    json: parsed\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        600,
+        0
+      ],
+      "id": "6d81f5a2-2c4f-4f69-8f38-9b70fea4baa8",
+      "name": "Parser"
+    },
+    {
+      "parameters": {
+        "jsCode": "// This array will hold all parsed leads\nconst leads = [];\n\n// Simple regex to find emails in text\nconst emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-z]{2,}/gi;\n\n// Loop over the 'organic_results' array from SerpAPI\nfor (const result of items[0].json.organic_results || []) {\n\n  // Extract title, link, and snippet from each search result\n  const nameAndRole = result.title || \"\";           // e.g. \"Jane Doe - SaaS Founder\"\n  const link = result.link || \"\";                   // LinkedIn profile URL\n  const snippet = result.snippet || \"\";             // Description snippet from Google\n  const extensions = result.rich_snippet?.top?.extensions || [];  // Additional info, often includes company\n\n  // Split title into name and role (based on \" - \")\n  const [namePart, rolePart] = nameAndRole.split(\" - \");\n\n  // Try to get company name from extensions (usually in 3rd position)\n  let company = \"\";\n  if (extensions.length >= 3 && typeof extensions[2] === \"string\") {\n    company = extensions[2].trim(); // Safe trim only if it's a string\n  }\n\n  // Try to extract email from snippet using regex\n  let emails = snippet.match(emailRegex);\n  // Use the first email if available, else empty string\n  let email = (emails && emails.length > 0) ? emails[0].trim() : \"\";\n\n  // Push the cleaned lead data into the leads array\n  leads.push({\n    json: {\n      name: namePart?.trim() || \"\",       // Safely trim name\n      role: rolePart?.trim() || \"\",       // Safely trim role\n      company: company,                   // Already trimmed\n      linkedinUrl: link,\n      email: email,                      // Extracted email if found\n      snippet: snippet,\n      scrapedAt: new Date().toISOString() // Timestamp when scraped\n    }\n  });\n}\n\n// Return all extracted leads to the next node\nreturn leads;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1260,
+        0
+      ],
+      "id": "3d51e6c2-db37-4081-912b-5a053f7c0b1c",
+      "name": "formatter"
+    },
+    {
+      "parameters": {
+        "url": "=https://serpapi.com/search.json",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "engine",
+              "value": "=google"
+            },
+            {
+              "name": "q",
+              "value": "={{ $json.searchQuery }}"
+            },
+            {
+              "name": "api_key",
+              "value": "92587dd1e36888774c5c53b96f34893f38596c9dc85611d2c8150a3e2243044c"
+            },
+            {
+              "name": "num",
+              "value": "={{ $json.leadCount }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1020,
+        0
+      ],
+      "id": "a8a219a5-f8f7-445f-9f66-b3de7456d4a3",
+      "name": "SerpAPI"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = items[0].json;\nconst platform = (input.platform || '').toLowerCase();\nconst roles = input.roles || [];\n\nconst quotedRoles = roles.map(role => `\"${role}\"`).join(\" OR \");\n\nlet searchQuery = \"\";\n\nif (platform === \"linkedin\") {\n  searchQuery = `site:linkedin.com/in (${quotedRoles})`;\n} else if (platform === \"twitter\") {\n  searchQuery = `site:twitter.com (${quotedRoles})`;\n} else {\n  // Default fallback query\n  searchQuery = `(${quotedRoles})`;\n}\n\nreturn [\n  {\n    json: {\n      searchQuery,\n      leadCount: input.leadCount || 10,\n      platform\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        820,
+        0
+      ],
+      "id": "fdc41951-4557-4cd3-9f0c-238925a25378",
+      "name": "query"
+    },
+    {
+      "parameters": {
+        "content": "# 🧠 AI Agent Setup Guide: Lead Scraper + Email Generator\n\n**Author:** Dharmik Solanki\n\nThis guide walks you through setting up your AI-powered lead scraping and email automation workflow using OpenRouter/Ollama, SerpAPI, and Google Sheets.\n\n---\n\n## ✅ Step 1: Set Up AI Model (OpenRouter or Ollama)\n\n### Option A – OpenRouter (Hosted)\n1. Visit [openrouter.ai](https://openrouter.ai/)\n2. Create an account and generate your API key\n3. Add an OpenRouter credential in n8n\n4. Use this credential in your LLM Chain or Chat Model nodes\n\n### Option B – Ollama (Local)\n1. Install [Ollama](https://ollama.com/)\n2. Run a model such as `mistral`, `llama2`, or `gemma`\n3. Use HTTP Request node with URL: `http://localhost:11434/api/generate`\n\n---\n\n## ✅ Step 2: Activate SerpAPI for Lead Discovery\n\n1. Sign up at [serpapi.com](https://serpapi.com/)\n2. Obtain your API key (free tier available)\n3. Add your API key as HTTP credential in n8n\n4. Use SerpAPI to perform Google searches targeting LinkedIn/Twitter profiles\n\n---\n\n## ✅ Step 3: Configure Google Sheets for Lead Storage\n\n1. Create a spreadsheet with columns:\n   `Name | Role | Company | LinkedIn URL | Snippet | Scraped At`\n2. Connect Google Sheets via OAuth2 in n8n\n3. Use Append operation to save leads\n\n---\n\n## ✅ Step 4: Automate Email Generation & Sending\n\n1. Generate `subjectLine` and `email` with AI prompts\n2. Send emails using Gmail node with OAuth2 or store in Sheets\n3. Add optional logic for follow-ups and lead quality filtering\n\n---\n\n## 🧪 Example Prompts\n\n**Lead scraping:**\n\"Scrape LinkedIn for AI founders and marketing managers. Give me 20 valid leads.\"\n\n**Email generation:**\n\"Write a concise, friendly outreach email to Jane Doe, Product Lead at AIFlow, about our automation product. Include a subject line. Signed, Dharmik Solanki.\"\n\n---\n\nReady to automate your entire outreach workflow—scrape, generate, save, and send!\n\nHappy automating 🚀",
+        "height": 900,
+        "width": 660
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -680,
+        -380
+      ],
+      "id": "7792f62f-cde2-4da5-b1f4-8e18c0f455ee",
+      "name": "📒 AI Agent Setup Guide1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an instruction parser for an AI lead scraping system.\n\nTake the following user request and convert it to a JSON with the following fields:\n- \"platform\": the source website or platform mentioned\n- \"roles\": an array of job roles to search for\n- \"leadCount\": number of leads to extract (if not found, assume 10)\n- \"filters\": additional constraints like email, LinkedIn URL, etc.\n- \"location\": add the location if given \n\nIf any field is missing in the instruction, make your best guess.\n\nRespond ONLY with the JSON. Do not explain.\n\nUser request:\n\"{{ $json.chatInput }}\"\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        260,
+        0
+      ],
+      "id": "1edd1f20-cc58-4dbf-b3c9-eb894e1b131c",
+      "name": "Massage to json"
+    },
+    {
+      "parameters": {
+        "model": "deepseek/deepseek-r1:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        260,
+        160
+      ],
+      "id": "71688ca1-0dd7-47e3-9cd5-99bf46b2b7c3",
+      "name": "deepseek-r1",
+      "credentials": {
+        "openRouterApi": {
+          "id": "hZlmyeMFgauwwZHg",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# Lead Scraper Agent",
+        "height": 440,
+        "width": 1660,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        20,
+        -140
+      ],
+      "typeVersion": 1,
+      "id": "beb47f78-a429-4c28-8a5e-166aa5450655",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Massage to json",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parser": {
+      "main": [
+        [
+          {
+            "node": "query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "formatter": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SerpAPI": {
+      "main": [
+        [
+          {
+            "node": "formatter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "query": {
+      "main": [
+        [
+          {
+            "node": "SerpAPI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Massage to json": {
+      "main": [
+        [
+          {
+            "node": "Parser",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "deepseek-r1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Massage to json",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "4668045b-f2bd-4ab4-973b-54fc4f0dd9c4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "558d88703fb65b2d0e44613bc35916258b0f0bf983c5d4730c00c424b77ca36a"
+  },
+  "id": "e1ucNX84vSFHuste",
+  "tags": []
+}

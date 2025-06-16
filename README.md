@@ -18,7 +18,7 @@ Generates cold emails from plain-text prompts, personalizes them, and sends auto
 ### 2. 🕵️‍♂️ [Lead Scraper Agent](./agents/lead-scraper-agent)
 Scrapes targeted leads from search terms and adds them to a Google Sheet.
 
-### 3. 🕵️‍♂️ [Stock Market Insights AI Agent](./agents/Stock Market Insights AI Agent)
+### 3. 🕵️‍♂️ [Stock Market Insights AI Agent](./agents/Stock-Market-Insights-AI-Agent)
 Provides real-time stock market insights, news, and analysis from various sources.
 
 ---

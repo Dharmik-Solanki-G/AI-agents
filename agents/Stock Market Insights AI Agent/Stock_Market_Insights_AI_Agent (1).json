@@ -1,0 +1,228 @@
+{
+  "name": "Stock Market Insights AI Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "e4ad27a5-0603-48a1-8142-222bda685ed1",
+      "name": "When chat message received",
+      "webhookId": "01352fb8-cc7d-4316-a8f9-76aaca6cfe21"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmOllama",
+      "typeVersion": 1,
+      "position": [
+        280,
+        420
+      ],
+      "id": "25db2778-ba94-4508-8d81-fe32f88b2a31",
+      "name": "Ollama Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "xHuYe0MDGOs9IpBW",
+          "name": "Local Ollama service"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a strict data extraction assistant.\n\nYour only task is to extract the NSE stock ticker symbol from the following user message.\n\nThe valid tickers are:\n\nRELIANCE.NS, TCS.NS, HDFCBANK.NS, INFY.NS, ICICIBANK.NS, HINDUNILVR.NS, SBIN.NS, ITC.NS, BHARTIARTL.NS, KOTAKBANK.NS, LT.NS, AXISBANK.NS, MARUTI.NS, ASIANPAINT.NS, NESTLEIND.NS, HCLTECH.NS, BAJFINANCE.NS, WIPRO.NS, ULTRACEMCO.NS, TITAN.NS, TATAMOTORS.NS, SUNPHARMA.NS, NTPC.NS, POWERGRID.NS, BAJAJFINSV.NS, DRREDDY.NS, TECHM.NS, ONGC.NS, TATASTEEL.NS, INDUSINDBK.NS, M&M.NS, ADANIENT.NS, COALINDIA.NS, JSWSTEEL.NS, CIPLA.NS, GRASIM.NS, HEROMOTOCO.NS, UPL.NS, BRITANNIA.NS, EICHERMOT.NS, HDFCLIFE.NS, SBILIFE.NS, DIVISLAB.NS, HINDALCO.NS, BAJAJ-AUTO.NS, SHREECEM.NS, APOLLOHOSP.NS, HDFCAMC.NS, ADANIPORTS.NS, BPCL.NS, PNB.NS, BANKBARODA.NS, FEDERALBNK.NS, IDFCFIRSTB.NS, AUBANK.NS, BANDHANBNK.NS, TVSMOTOR.NS, ASHOKLEY.NS, FORCEMOT.NS, MRF.NS, BALKRISIND.NS, CEATLTD.NS, APOLLOTYRE.NS, JKTYRE.NS, BHARATFORG.NS, LUPIN.NS, AUROPHARMA.NS, BIOCON.NS, ZYDUSLIFE.NS, ALKEM.NS, GLENMARK.NS, TORNTPHARM.NS, IPCALAB.NS, ABBOTINDIA.NS, PFIZER.NS, GSK.NS, VEDL.NS, SAIL.NS, NMDC.NS, JINDALSTEL.NS, NATIONALUM.NS, APLAPOLLO.NS, HINDZINC.NS, RATNAMANI.NS, WELCORP.NS, MOIL.NS, LTIM.NS, MPHASIS.NS, PERSISTENT.NS, COFORGE.NS, LTTS.NS, DABUR.NS, MARICO.NS, GODREJCP.NS, COLPAL.NS, UBL.NS, TATACONSUM.NS, EMAMILTD.NS, PGHH.NS, VBL.NS\n\nRespond with exactly one word: the ticker symbol matching the user input, in uppercase with `.NS` suffix.\n\nIf no valid ticker is found, respond with: NONE\n\nDo NOT provide explanations, extra text, or formatting. ONLY respond with the ticker or NONE.\n\nUser message: \"{{ $json.chatInput }}\"\n",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are a strict data extraction assistant.\n\nYour only task is to extract the NSE stock ticker symbol from the user's input message.\n\nThe valid tickers are:\n\nRELIANCE.NS, TCS.NS, HDFCBANK.NS, INFY.NS, ICICIBANK.NS, HINDUNILVR.NS, SBIN.NS, ITC.NS, BHARTIARTL.NS, KOTAKBANK.NS, LT.NS, AXISBANK.NS, MARUTI.NS, ASIANPAINT.NS, NESTLEIND.NS, HCLTECH.NS, BAJFINANCE.NS, WIPRO.NS, ULTRACEMCO.NS, TITAN.NS, TATAMOTORS.NS, SUNPHARMA.NS, NTPC.NS, POWERGRID.NS, BAJAJFINSV.NS, DRREDDY.NS, TECHM.NS, ONGC.NS, TATASTEEL.NS, INDUSINDBK.NS, M&M.NS, ADANIENT.NS, COALINDIA.NS, JSWSTEEL.NS, CIPLA.NS, GRASIM.NS, HEROMOTOCO.NS, UPL.NS, BRITANNIA.NS, EICHERMOT.NS, HDFCLIFE.NS, SBILIFE.NS, DIVISLAB.NS, HINDALCO.NS, BAJAJ-AUTO.NS, SHREECEM.NS, APOLLOHOSP.NS, HDFCAMC.NS, ADANIPORTS.NS, BPCL.NS, PNB.NS, BANKBARODA.NS, FEDERALBNK.NS, IDFCFIRSTB.NS, AUBANK.NS, BANDHANBNK.NS, TVSMOTOR.NS, ASHOKLEY.NS, FORCEMOT.NS, MRF.NS, BALKRISIND.NS, CEATLTD.NS, APOLLOTYRE.NS, JKTYRE.NS, BHARATFORG.NS, LUPIN.NS, AUROPHARMA.NS, BIOCON.NS, ZYDUSLIFE.NS, ALKEM.NS, GLENMARK.NS, TORNTPHARM.NS, IPCALAB.NS, ABBOTINDIA.NS, PFIZER.NS, GSK.NS, VEDL.NS, SAIL.NS, NMDC.NS, JINDALSTEL.NS, NATIONALUM.NS, APLAPOLLO.NS, HINDZINC.NS, RATNAMANI.NS, WELCORP.NS, MOIL.NS, LTIM.NS, MPHASIS.NS, PERSISTENT.NS, COFORGE.NS, LTTS.NS, DABUR.NS, MARICO.NS, GODREJCP.NS, COLPAL.NS, UBL.NS, TATACONSUM.NS, EMAMILTD.NS, PGHH.NS, VBL.NS\n\nRespond with exactly one word: the ticker symbol matching the user input, in uppercase with `.NS` suffix.\n\nIf no valid ticker is found, respond with: NONE\n\nDo NOT provide explanations, extra text, or formatting. ONLY respond with the ticker or NONE.\n"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        220,
+        0
+      ],
+      "id": "20166e1f-6b6b-494f-8fb3-bdebfcafa2fc",
+      "name": "Extract Ticker from User Prompt"
+    },
+    {
+      "parameters": {
+        "url": "=https://query1.finance.yahoo.com/v8/finance/chart/{{ $json.text }}?range=5d&interval=1d",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        580,
+        0
+      ],
+      "id": "0680cde5-5269-4fa1-8232-23f22508030c",
+      "name": "Yahoo Finance Data"
+    },
+    {
+      "parameters": {
+        "url": "https://newsapi.org/v2/everything",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $json.chart.result[0].meta.longName }}"
+            },
+            {
+              "name": "language",
+              "value": "en"
+            },
+            {
+              "name": "sortBy",
+              "value": "publishedAt"
+            },
+            {
+              "name": "apiKey",
+              "value": "=e205d77d7bc14acc8744d3ea10568f50"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        240
+      ],
+      "id": "afca1c06-a8fa-4460-89e3-22eb27b277f9",
+      "name": "Fetch News Headlines"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Here is the stock data for {{ $('Yahoo Finance Data').item.json.chart.result[0].meta.symbol }} ({{ $('Yahoo Finance Data').item.json.chart.result[0].meta.longName }}):\n\n- Current Price: ₹{{ $('Yahoo Finance Data').item.json.chart.result[0].meta.regularMarketPrice }}\n- Day High: ₹{{ $('Yahoo Finance Data').item.json.chart.result[0].meta.regularMarketDayHigh }}, Day Low: ₹{{ $('Yahoo Finance Data').item.json.chart.result[0].meta.regularMarketDayLow }}\n- 52-Week High: ₹{{ $('Yahoo Finance Data').item.json.chart.result[0].meta.fiftyTwoWeekHigh }}, 52-Week Low: ₹{{ $('Yahoo Finance Data').item.json.chart.result[0].meta.fiftyTwoWeekLow }}\n- Previous Close: ₹{{ $('Yahoo Finance Data').item.json.chart.result[0].meta.chartPreviousClose }}\n- Trading Volume: {{ $('Yahoo Finance Data').item.json.chart.result[0].meta.regularMarketVolume }}\n\nTechnical indicators (last 5 days closing prices):  \n[{{ $('Yahoo Finance Data').item.json.chart.result[0].indicators.quote[0].close[0] }}, {{ $('Yahoo Finance Data').item.json.chart.result[0].indicators.quote[0].close[1] }}, {{ $('Yahoo Finance Data').item.json.chart.result[0].indicators.quote[0].close[2] }}, {{ $('Yahoo Finance Data').item.json.chart.result[0].indicators.quote[0].close[3] }}, {{ $('Yahoo Finance Data').item.json.chart.result[0].indicators.quote[0].close[4] }}]\n\nRecent news articles related to {{ $('Yahoo Finance Data').item.json.chart.result[0].meta.symbol }}:\n\n1. Title: {{ $json.newsArticles[0].title }}  \n   Description: {{ $json.newsArticles[0].description }}\n\n2. Title: {{ $json.newsArticles[1].title }}  \n   Description: {{ $json.newsArticles[1].description }}\n\n3. Title: {{ $json.newsArticles[2].title }}  \n   Description: {{ $json.newsArticles[2].description }}\n\n4. Title: {{ $json.newsArticles[3].title }}  \n   Description: {{ $json.newsArticles[3].description }}\n\n5. Title: {{ $json.newsArticles[4].title }}  \n   Description: {{ $json.newsArticles[4].description }}\n\nPlease summarize the stock’s current market condition, news sentiment, trading signals, and give your insights and recommendation in the required format.\n",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=You are a professional financial analyst AI assistant. Your role is to analyze stock market data and related news, then generate a clear and concise report in the specified format.\n\nAlways structure your response as follows:\n\nMarket Status:\n[Summarize key metrics such as current price, day high/low, 52-week high/low, previous close, and volume. Mention if price is up/down from previous close. Add brief comment on whether stock appears bullish, bearish, or consolidating.]\n\nNews Sentiment:\n[Summarize the 5 latest news headlines with company relevance. Group by tone (positive, negative, neutral) and mention any that may impact sentiment or price.]\n\nTechnical Signals & Trends:\n\nResistance level: ₹[value]\n\nSupport level: ₹[value]\n\nVolume trend: [high/low/neutral activity]\n\nNotable indicators: [e.g., moving average direction, breakout potential, gap-up/down]\n\nInsights & Recommendation:\n[Provide concise actionable insight. E.g., cautious bullish trend, neutral outlook with support holding, or early bearish signs. Mention any watch-outs or confirmations needed.]\n\nRisks & Caveats:\n[Highlight external risks (market sentiment, geopolitical, etc.) or internal company risks that might affect movement.]\n\nAlways write in professional, simple English suitable for a retail investor. Do not mention tools or templates used. Focus on clarity, brevity, and financial relevance."
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        440,
+        240
+      ],
+      "id": "28ed2cc7-3ff1-4c71-ae32-9e3a6ed151d9",
+      "name": "Financial Analyst AI Agent"
+    },
+    {
+      "parameters": {
+        "jsCode": "const newsData = items[0].json; \n\n// Confirm articles exist and slice safely\nconst limitedArticles = (newsData.articles && Array.isArray(newsData.articles)) ? newsData.articles.slice(0, 5) : [];\n\nreturn [\n  {\n    json: {\n      newsArticles: limitedArticles\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        240
+      ],
+      "id": "55b5c02e-37bd-4a9f-b7a7-abaebb85e5ce",
+      "name": "Filter"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Extract Ticker from User Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Extract Ticker from User Prompt",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Financial Analyst AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Ticker from User Prompt": {
+      "main": [
+        [
+          {
+            "node": "Yahoo Finance Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Yahoo Finance Data": {
+      "main": [
+        [
+          {
+            "node": "Fetch News Headlines",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch News Headlines": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Financial Analyst AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "108c19a3-b70e-4861-8a1f-4c74ffca0e43",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "558d88703fb65b2d0e44613bc35916258b0f0bf983c5d4730c00c424b77ca36a"
+  },
+  "id": "doi8LI3rLIufAvjt",
+  "tags": []
+}
